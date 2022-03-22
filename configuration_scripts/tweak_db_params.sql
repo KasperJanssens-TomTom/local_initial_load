@@ -1,0 +1,15 @@
+ALTER system SET wal_level='minimal';
+ALTER system SET wal_buffers='256MB';
+ALTER system SET archive_mode='off';
+ALTER system SET max_wal_senders='0';
+-- ALTER system SET fsync='off'; -- caused too much damage when all RAM has been filled and pg crashed, however osm in their DL used this
+ALTER system SET synchronous_commit='off';
+ALTER system SET checkpoint_timeout='1h';
+ALTER system SET max_wal_size='2048GB';
+ALTER system SET maintenance_work_mem='4GB';
+ALTER system SET effective_io_concurrency='32';
+ALTER system SET wal_keep_size='250GB';
+ALTER system SET max_wal_size='1TB';
+ALTER system SET max_parallel_workers = 48;
+ALTER system SET max_parallel_workers_per_gather = 8;
+ALTER system SET constraint_exclusion = on;

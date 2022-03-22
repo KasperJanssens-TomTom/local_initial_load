@@ -1,0 +1,13 @@
+CREATE INDEX association_source_type_feature_id_idx ON :schema.association USING btree (source_feature_id, association_type);
+CREATE INDEX association_target_type_feature_id_idx ON :schema.association USING btree (target_feature_id, association_type);
+CREATE INDEX association_property_entry_association_id_idx ON :schema.association_property_entry USING btree (association_id);
+CREATE INDEX association_property_entry_attribute_value_id_idx ON :schema.association_property_entry USING btree (attribute_value_id);
+CREATE INDEX association_property_entry_property_type_idx ON :schema.association_property_entry USING btree (property_type);
+CREATE INDEX attributes_type_idx ON :schema.attributes USING btree (attribute_type);
+CREATE INDEX dictionary_ddct_type_idx ON :schema.dictionary USING btree (ddct_type);
+CREATE INDEX dictionary_model_version_idx ON :schema.dictionary USING btree (model_version_id);
+CREATE INDEX feature_feature_type ON :schema.feature USING btree (feature_type);
+CREATE INDEX feature_property_entry_attribute_value_id_idx ON :schema.feature_property_entry USING btree (attribute_value_id);
+CREATE INDEX feature_property_entry_feature_id_idx ON :schema.feature_property_entry USING btree (feature_id);
+CREATE INDEX feature_property_entry_property_type_idx ON :schema.feature_property_entry USING btree (property_type);
+CREATE INDEX metadata_objects_id_idx ON :schema.metadata USING btree (metadata_objects_id);

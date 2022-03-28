@@ -174,7 +174,7 @@ function psql {
 
 function ensure-mds-schema-and-tables {
   echo '--- Starting ensure-mds-schema-and-tables ---'
-  sed "s/%SCHEMA%/$MDS_SCHEMA/g" configuration_scripts/create_mds_schema.sql | sed "s/%OWNER%/$OWNER/g" | PGPASSWORD="${DB_PWD}" psql -p "${PORT}" -h localhost -d "$DATABASE" -U "$USER" -a
+  sed "s/%SCHEMA%/$MDS_SCHEMA/g" configuration_scripts/create_mds_schema.sql | sed "s/%OWNER%/$OWNER/g" | PGPASSWORD="${DB_PWD}" psql -p "${PORT}" -h localhost -U "$USER" -a
   echo '--- Finished ensure-mds-schema-and-tables ---'
 }
 

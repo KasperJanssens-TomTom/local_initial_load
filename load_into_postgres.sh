@@ -401,7 +401,7 @@ function create-mds-constraints {
   echo '--- Starting create-mds-constraints ---'
   _start=$(date +%s)
   while read -ru 10 query; do
-    psql -p "$PORT"-d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
+    psql -p "$PORT" -d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
   done 10<configuration_scripts/create_mds_constraints.sql
   wait
   _end=$(date +%s)

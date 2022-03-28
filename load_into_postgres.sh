@@ -174,7 +174,7 @@ function psql {
 
 function ensure-mds-schema-and-tables {
   echo '--- Starting ensure-mds-schema-and-tables ---'
-  sed "s/%SCHEMA%/$MDS_SCHEMA/g" configuration_scripts/create_mds_schema.sql | sed "s/%OWNER%/$OWNER/g" | PGPASSWORD="${DB_PWD}" psql -p "${PORT}" -h localhost -U "$USER" -a
+  sed "s/%SCHEMA%/$MDS_SCHEMA/g" configuration_scripts/create_mds_schema.sql | sed "s/%OWNER%/$OWNER/g" | PGPASSWORD="${DB_PWD}" psql -p "${PORT}" -h localhost  -d "${DATABASE}" -U "$USER" -a
   echo '--- Finished ensure-mds-schema-and-tables ---'
 }
 
@@ -401,7 +401,7 @@ function create-mds-constraints {
   echo '--- Starting create-mds-constraints ---'
   _start=$(date +%s)
   while read -ru 10 query; do
-    psql -p "$PORT" -d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
+    psql -p "$PORT" -h localhost -d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
   done 10<configuration_scripts/create_mds_constraints.sql
   wait
   _end=$(date +%s)

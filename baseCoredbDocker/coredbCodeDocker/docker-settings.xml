@@ -1,0 +1,85 @@
+<!--
+    Direct Maven to go to the Amsterdam satellite Nexus proxy server for the retrieval of all artifacts. company should be able to use this unchanged and it would work but you might
+    be going further than necessary for your artifacts. See below for comments on the URL in this file
+    that you should change to use a site local proxy and hence work more quickly.
+-->
+<settings>
+  <profiles>
+    <profile>
+      <id>nexus-local</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+      </repository>
+    </repositories>
+ 
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+  </profiles>
+ 
+  <mirrors>
+    <mirror>
+      <!-- Use the local TomTom satellite Nexus proxy to resolve all artifact references. -->
+      <id>nexus-local</id>
+      <mirrorOf>*</mirrorOf>
+      <!-- <url>http://nexus.tomtomgroup.com:8080/nexus/content/groups/public</url> -->
+ 
+      <!-- The Amsterdam site Nexus proxy, CHANGE THIS FOR OTHER SITES IF APPLICABLE! -->
+      <url>http://nexus-ldz.tomtomgroup.com:8081/nexus/content/groups/public</url>
+    </mirror>
+  </mirrors>
+ 
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>deployment</username>
+      <password>deployment</password>
+      <filePermissions>644</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+ 
+    <server>
+      <id>tomtom-releases</id>
+      <username>developer</username>
+      <password>tomtom</password>
+      <filePermissions>644</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+ 
+    <server>
+      <id>tomtom-snapshots</id>
+      <username>developer</username>
+      <password>tomtom</password>
+      <filePermissions>644</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+ 
+    <server>
+      <id>thirdparty</id>
+      <username>deployment</username>
+      <password>deployment</password>
+      <filePermissions>644</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+ 
+    <server>
+      <id>tomtom-projects</id>
+      <username>continuum</username>
+      <filePermissions>644</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+  </servers>
+</settings>

@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  test-postgres:
+    image: mdillon/postgis:11
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hasL0
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+    command: postgres -c 'fsync=off' -c 'max_connections=300' -c 'max_prepared_transactions=300' 
+  coredb-source:
+    image: coredb-source
+    ports:
+      - 8080:8080
+
+networks:                                
+  default:                               
+    driver: bridge                       
+    driver_opts:                         
+      com.docker.network.driver.mtu: 1300

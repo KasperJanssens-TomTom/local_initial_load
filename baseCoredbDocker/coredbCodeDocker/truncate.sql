@@ -1,0 +1,2 @@
+truncate table localizer.db_connection_settings;
+truncate table localizer.db_inactive_connection_settings;

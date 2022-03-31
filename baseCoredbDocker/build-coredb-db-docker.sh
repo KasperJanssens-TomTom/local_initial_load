@@ -2,4 +2,4 @@
 
 sudo chown -R "$1" data/
 
-docker build . -t mycoredb-docker-4-real
+docker build . -t cppspdocker.azurecr.io/coredb:1

@@ -401,7 +401,7 @@ function create-mds-constraints {
   echo '--- Starting create-mds-constraints ---'
   _start=$(date +%s)
   while read -ru 10 query; do
-    psql -p "$PORT" -h localhost -d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
+    PGPASSWORD="${DB_PWD}" psql -p "$PORT" -h localhost -d "$DATABASE" -U "$USER" -a -v schema="${MDS_SCHEMA}" <<< "$query" &
   done 10<configuration_scripts/create_mds_constraints.sql
   wait
   _end=$(date +%s)
@@ -476,7 +476,7 @@ echo "-- CSV files will be copied to ${tempdir} --"
   fi
 
   for TABLE in association feature dictionary model_versions; do
-      aws s3 ls "$SMDS_S3_SOURCE"$TABLE/ | grep -P "($TABLE)_*"
+      # aws s3 ls "$SMDS_S3_SOURCE"$TABLE/ | grep -P "($TABLE)_*"
       if ! aws s3 ls "$SMDS_S3_SOURCE"$TABLE/ | grep -P "($TABLE)_*" > /dev/null ; then
           echo "S3 object ${SMDS_S3_SOURCE}$TABLE/ does not contain required *.csv.gz files for populating SMDS."
           exit 2

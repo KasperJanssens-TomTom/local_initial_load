@@ -25,6 +25,7 @@ There is a script in the repository that will create and empty coredb and tag it
 The reason why this needs to be executed inside a docker compose is that it is important for the liquibase scripts to be able to connect to a server called test-postgres. This server name will be present inside tables that are created and this server name needs to be used in the test layers code or any other code that starts this empty coredb docker.
 
 ### Create an initial loaded coredb
+**CAVEAT** need to be able to read from s3. Saml log on is necessary. There is a script inside that performs the log in but only in case you have created your profile. The script is called log_on_through_saml.sh. Create profile : https://confluence.tomtomgroup.com/display/OSM/Logging+into+an+AWS+account
 
 There is a script that will create a coredb with an initial load performed. It is called build_osm_hkm_layer.sh
 

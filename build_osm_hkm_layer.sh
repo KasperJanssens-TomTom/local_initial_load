@@ -26,6 +26,12 @@ popd || exit
 
 ./load_it_to_fresh_postgres.sh
 
+pushd idindex || exit
+
+./load_all_scripts --database=cordb --user=postgres --db_pwd=hasL0 --port=5432
+
+popd || exit
+
 ./build_coredb_osm_hkm_docker.sh "$1"
 
 pushd coredbCodeDocker || exit

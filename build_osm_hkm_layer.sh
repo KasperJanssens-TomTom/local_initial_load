@@ -42,7 +42,7 @@ popd || exit
 
 ./build_coredb_osm_hkm_docker.sh "$1"
 
-pushd coredbCodeDocker || exit
+pushd baseCoredbDocker || exit
 
 docker-compose down
 

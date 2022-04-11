@@ -57,3 +57,5 @@ PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABAS
 PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABASE}" -f 006_run_store_proc.sql #this runs it for the first table, feature
 PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABASE}" -f 006_run_store_proc.sql # this runs it for the second table, attributes
 PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABASE}" -f 007_create_localizer.sql
+PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABASE}" -f 008_create_db_connection_settings.sql
+PGPASSWORD="${DB_PWD}" psql -h localhost -U "${USER}" -p "${PORT}" -d "${DATABASE}" -f 009_create_dictionary.sql

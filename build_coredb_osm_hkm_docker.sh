@@ -2,4 +2,4 @@
 
 sudo chown -R "$1" baseCoredbDocker/data/
 
-docker build . -t cppspdocker.azurecr.io/coredb-osm-hkm:2
+docker build . -t cppspdocker.azurecr.io/coredb-osm-hkm:4

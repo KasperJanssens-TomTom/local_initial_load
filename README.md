@@ -34,3 +34,7 @@ There is a script that will create a coredb with an initial load performed. It i
 * No pushes are done, need to be done manually
 
 The reason why we need two different scipts is that before copying the data folder locally to the new docker, we need to chown that folder so our current user can read it. However, that means we cannot make changes to it anymore. We could try to find a way around it, chown it back or just make it readable for everybody, that will likely be enough, but this is the easy, brute-force approach for now.
+
+
+### Troubleshooting: 
+* If you get a message about not being able to clone or not finding test-postgres during the loading of the liquibase scripts, chances are you activated or deactivated your vpn without cleaning up the docker compose network. In fact most network issues can be traced back to this. Simple perform a `docker-compose down --remove-orphans` or prune the docker network manually yourself.

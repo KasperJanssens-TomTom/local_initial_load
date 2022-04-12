@@ -8,6 +8,8 @@ fi
 
 ./cleanup.sh
 
+./log_on_through_saml.sh
+
 pushd baseCoredbDocker || exit
 
 pushd coredbCodeDocker || exit

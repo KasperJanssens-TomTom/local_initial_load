@@ -8,6 +8,8 @@ fi
 
 ./cleanup.sh
 
+./log_on_through_saml.sh
+
 pushd baseCoredbDocker || exit
 
 pushd coredbCodeDocker || exit
@@ -23,5 +25,10 @@ sleep 5s
 docker exec -it basecoredbdocker_coredb-source_1  /run_the_liquibase_scripts.sh
 
 ./build_coredb_db_docker.sh "$1"
+
+pushd baseCoredbDocker || exit
+
+docker-compose down
+
 
 popd || exit

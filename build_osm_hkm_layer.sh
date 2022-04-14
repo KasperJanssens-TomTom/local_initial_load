@@ -1,14 +1,64 @@
 #!/bin/bash
-set -ex
+set -euxo
 
-if [[ $# -eq 0 || $# -gt 2 ]]; then
-	echo 'Too few arguments, expecting one, the user:group to perform a chown. ALternatively, pass false as a parameter to not use the new style of input load' >&2
-	exit 1
+function show_usage {
+  echo
+  echo "Usage: $0 [OPTION]"
+  echo "Builds empty coredb layer from empty postgis by applying liquibase scripts on top"
+  echo
+  echo "  --user/group=NAME [Required] user:group for chowning data folder created by postgisxd"
+  echo "  --version=VERSION [Optional] Version of docker to be built"
+  echo "  --new-style=NEWSTYLE [Optional] Use the new style of direct load or the old style. True means new style. True is default"
+  echo "  --skip-saml=SKIP_SAML [Optional] Skip Saml, when passed the script will assume saml check already done elsewhere"
+  echo "  -help, --help              Show this help"
+  exit 1
+}
+
+if [ $# -eq 0 ]; then
+  echo "There are mandatory parameters"
+  show_usage
 fi
+
+for i in "$@"; do
+  case $i in
+  --usergroup=*)
+    USERGROUP="${i#*=}"
+    shift
+    ;;
+  --version=*)
+    VERSION="${i#*=}"
+    shift
+    ;;
+  --new-style=*)
+    NEWSTYLE="${i#*=}"
+    shift
+    ;;
+  --skip-saml)
+    SKIP_SAML=true
+    shift
+    ;;
+  -help | --help)
+    show_usage
+    ;;
+  *)
+    echo "unknown option: ${i#*=}"
+    show_usage
+    ;;
+  esac
+done
+
+if [[ -z "$USERGROUP" ]]; then
+	echo "USERGROUP is mandatory"
+	exit
+fi
+
+./configure.sh
 
 ./cleanup.sh
 
-./log_on_through_saml.sh
+if [[! ${SKIP_SAML:-false} ]]
+  ./log_on_through_saml.sh
+fi
 
 pushd baseCoredbDocker || exit
 
@@ -26,7 +76,9 @@ docker exec -it basecoredbdocker_coredb-source_1  /run_the_liquibase_scripts.sh
 
 popd || exit
 
-new_style="${2:-true}"    # Default value is false
+pushd osmCoredbDocker || exit
+
+new_style="${NEWSTYLE:-true}" 
 if "$new_style"; then
 	echo "new style input load"
         ./load_it_to_fresh_postgres_new_style.sh
@@ -42,10 +94,12 @@ pushd idindex || exit
 
 popd || exit
 
-./build_coredb_osm_hkm_docker.sh "$1"
+popd || exit
 
 pushd baseCoredbDocker || exit
 
-docker-compose down
+./build_coredb_osm_hkm_docker.sh "${USERGROUP}" "${VERSION:-2}"
+
+docker-compose down --remove-orphans
 
 popd || exit

@@ -5,10 +5,9 @@ This has advantages and disadvantages.
 The main advantages are that we can be as close to production as we want without having to actually depend on production servers like we do currently. 
 
 The disadvantages are of course the time it takes to write and maintain this repo as well as the fact that this type of tests tend to be on the slow side, booting up dockers and the like is slow-ish. Next to that it is not so easy to load up fake data as it could be when fully mocking these dependencies in code.  
-# TODO 
-check all necessary tools just like a configure step does
-move configuration_scripts and idindex to a subfolder osmCoredbDocker. Change all script links and change the readme
-document the usage of [Dockerfile](./Dockerfile)
+
+# Caveat
+This script is mainly intended to run on Linux. MacOs should be possible too, but not all tools on mac os are gnu tools so no guarantees that the options are the same. In fact, guarantees that with the default mac toolchain it won't work.
 
 ## Goals
 * Have an empty coredb docker build from master
@@ -31,25 +30,30 @@ So, **important**, this docker will only function if it can be called as if it i
 
 ### Create an initial loaded coredb
 **CAVEAT** need to be able to read from s3. Saml log on is necessary. There is a script inside that performs the log in but only in case you have created your profile. The script is called `log_on_through_saml.sh`. To create profile, check [this confluence page](https://confluence.tomtomgroup.com/display/OSM/Logging+into+an+AWS+account)
-To avoid annoying bug-hunts, this script is called by default during a run for now, this unfortunately means that the script is not fully unattended.
+To avoid annoying bug-hunts, this script is called by default during a run for now, this unfortunately means that the script is not fully unattended. Also, the script assumes that saml2aws is installed in a specific folder. If you want to skip this check because you want to install it elsewhere and call manually, you can add the --skip-saml flag.
 
 There is a script that will create a coredb with an initial load performed. It is called [build_osm_hkm_layer.sh](./build_osm_hkm_layer.sh)
 
-* This script will perform all the same steps for creating an empty coredb but will not perform the last step, creating the empty docker. Instead, it will run the [load_into_postgres_new.sh](./load_into_postgres_new.sh) script that will clone an s3 folder containing an initial load and load these dumped csv files.
-  * Note, there is a version that handles the old style of dumps, called [load_into_fresh_postgres.sh](./load_into_postgres.sh). This is currently no longer used but is just present in case somebody encounters a dump in the old style. The difference between both is not totally clear to me but if you get errors concerning the directory layout of the dump you're trying to load you are or not authorized to download the dump or the dump is in the other format than the one you selected.
-  * This script will first of all create the structure, by using the [configuration_scripts](./configuration_scripts) folder. Not all scripts in there are currently used, anyd it might not be the best idea to check them in in this repo and not point to them online, but it seemed that there was not really a master version of these scripts.
+* This script will perform all the same steps for creating an empty coredb but will not perform the last step, creating the empty docker. Instead, it will run the [load_into_postgres_new.sh](osmCoredbDocker/load_into_postgres_new.sh) script that will clone an s3 folder containing an initial load and load these dumped csv files.
+  * Note, there is a version that handles the old style of dumps, called [load_into_fresh_postgres.sh](osmCoredbDocker/load_into_postgres.sh). This is currently no longer used but is just present in case somebody encounters a dump in the old style. The difference between both is not totally clear to me but if you get errors concerning the directory layout of the dump you're trying to load you are or not authorized to download the dump or the dump is in the other format than the one you selected.
+  * This script will first of all create the structure, by using the [configuration_scripts](osmCoredbDocker/configuration_scripts) folder. Not all scripts in there are currently used, anyd it might not be the best idea to check them in in this repo and not point to them online, but it seemed that there was not really a master version of these scripts.
   * The next part will be using the azure tool to download the csv files that make up the direct load locally.
   * As soon as that is done, these csv files will be loaded up through psql
-* The next part is creating the localizer and idindex. The scripts for this can be found in the [idindex](./idindex) folder, I will go a bit deeper into it later in the readme as it is interesting.
-* In the end it will create a loaded docker and tag it, through the [build_coredb_osm_hkm_docker.sh](./build_coredb_osm_hkm_docker.sh) script. It will create a docker with this name `cppspdocker.azurecr.io/coredb-osm-hkm`, and a version currently hard coded inside the script.
+* The next part is creating the localizer and idindex. The scripts for this can be found in the [idindex](osmCoredbDocker/idindex) folder, I will go a bit deeper into it later in the readme as it is interesting.
+* In the end it will create a loaded docker and tag it, through the [build_coredb_osm_hkm_docker.sh](baseCoredbDocker/build_coredb_osm_hkm_docker.sh) script. It will create a docker with this name `cppspdocker.azurecr.io/coredb-osm-hkm`, and a version currently hard coded inside the script.
 * No pushes are done, need to be done manually
 
 The reason why we need two different scripts is that before copying the data folder locally to the new docker, we need to chown that folder so our current user can read it. However, that means we cannot make changes to it anymore. We could try to find a way around it, chown it back or just make it readable for everybody, that will likely be enough, but this is the easy, brute-force approach for now.
 
+### The Dockerfile
+There is a [Dockerfile](baseCoredbDocker/Dockerfile) that is used to build both the empty layer and the direct loaded layer. It is a bit confusing but due to the limits of Docker mounting paths there was not much alternative. Both times it will mount the contents of baseCoredbDocker/data inside a docker. 
+When running the empty layer build, the only data there will be the scripts that have been run for creating an empty coredb layer.
+When running the osm layer build, the data folder will contain also the direct load files. It is a bit annoying that this data folder and Dockerfile are both in the baseCoredbDocker folder even if they can contain data that is more than just the baseCoredbDocker, but the alternative involved too much duplication.
+
 ### Troubleshooting: 
 * If you get a message about not being able to clone or not finding test-postgres during the loading of the liquibase scripts, chances are you activated or deactivated your vpn without cleaning up the docker compose network. In fact most network issues can be traced back to this. Simple perform a `docker-compose down --remove-orphans` or prune the docker network manually yourself.
 
-### Usage:
+### Usage of the built dockers
 So, now we have two coredb dockers, an empty one and a filled one. But what can we do with this then? Well, the best way to use this, currently, is using the [test-layers](ssh://git@bitbucket.tomtomgroup.com:7999/cdb/test-layers.git) project.
 
 There is an example-test in there, called OsmHkmLayerWithKongTest, but in case it would be gone by the time you read this, the important part is in the start of the layer.
@@ -61,7 +65,7 @@ There is an example-test in there, called OsmHkmLayerWithKongTest, but in case i
 ```
 The consul key values are important in the start. First, currently the values need to be base64 encoded. This example could have been done a lot better of course, but `dHJ1ZQ==` is `true` in base 64.
 This code sets those two properties to true. What do those mean then? The first key sets the usage of the simplified index. The simplified index is the new way of creating the index, and is also the way the
-index is created by the scripts in the [idindex](./idindex) folder.
+index is created by the scripts in the [idindex](osmCoredbDocker/idindex) folder.
 
 ### The index, the localizer
 What this dump basically loads up is an `smds`, a snapshot mds. Normally, coredb uses a combination of `vmds`, or versioned mds and smds to retrieve a feature.
@@ -99,7 +103,7 @@ coredb=# select * from id_index_simplified_000000_0.index_key limit 10;
  85472292-7602-463d-8965-0747bcff67a1 | GLB
 ```
 
-Index key is a mapping from id to dataset name. This dataset name is then used eventually in the localizer schema, again, more specificall the db_connection_settings
+Index key is a mapping from id to dataset name. This dataset name is then used eventually in the localizer schema, again, more specifically the db_connection_settings. ( I have no idea what the boundary id should mean or come from, just invented one)
 
 ```roomsql
 coredb=# select * from localizer.db_connection_settings;

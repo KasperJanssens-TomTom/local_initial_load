@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euxo
+set -euo
 
 function show_usage {
   echo
@@ -8,7 +8,7 @@ function show_usage {
   echo
   echo "  --user/group=NAME [Required] user:group for chowning data folder created by postgisxd"
   echo "  --version=VERSION [Optional] Version of docker to be built"
-  echo "  --new-style=NEWSTYLE [Optional] Use the new style of direct load or the old style. True means new style. True is default"
+  echo "  --old-style [Optional] Use the old style of direct load."
   echo "  --skip-saml=SKIP_SAML [Optional] Skip Saml, when passed the script will assume saml check already done elsewhere"
   echo "  -help, --help              Show this help"
   exit 1
@@ -29,8 +29,8 @@ for i in "$@"; do
     VERSION="${i#*=}"
     shift
     ;;
-  --new-style=*)
-    NEWSTYLE="${i#*=}"
+  --old-style)
+    OLD_STYLE=true
     shift
     ;;
   --skip-saml)
@@ -56,7 +56,7 @@ fi
 
 ./cleanup.sh
 
-if [[! ${SKIP_SAML:-false} ]]
+if [[ ! ${SKIP_SAML:-false} ]]; then
   ./log_on_through_saml.sh
 fi
 
@@ -78,15 +78,14 @@ popd || exit
 
 pushd osmCoredbDocker || exit
 
-new_style="${NEWSTYLE:-true}" 
-if "$new_style"; then
-	echo "new style input load"
-        ./load_it_to_fresh_postgres_new_style.sh
-else
-	echo "old style input load"
-        ./load_it_to_fresh_postgres.sh
-fi
 
+if [[ ! ${OLD_STYLE:-false} ]]; then
+  echo "Old style direct load"
+  ./load_it_to_fresh_postgres.sh
+else
+  echo "New style direct load"
+  ./load_it_to_fresh_postgres_new_style.sh
+fi
 
 pushd idindex || exit
 

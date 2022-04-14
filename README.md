@@ -8,13 +8,16 @@ The disadvantages are of course the time it takes to write and maintain this rep
 
 # Caveat
 This script is mainly intended to run on Linux. MacOs should be possible too, but not all tools on mac os are gnu tools so no guarantees that the options are the same. In fact, guarantees that with the default mac toolchain it won't work.
+Also, vpn will be necessary for both scripts/goals because the code that needs to be cloned is in bitbucket.
 
 ## Goals
 * Have an empty coredb docker build from master
 * Have a coredb docker with an initial load performed
 
 ### Create an empty coredb 
-There is a script in the repository that will create and empty coredb and tag it. The script is called build_empty_layer.sh.
+There is a script in the repository that will create and empty coredb and tag it. The script is called [build_empty_layer.sh](./build_empty_layer.sh).
+
+It can be invoked with the magical incantation `./build_empty_layer.sh --usergroup=janssenk:janssenk --version=42` ( do fill out your own user and group). The latter is necessary for chowning the data folder created by the postgres docker.
 
 * It will first build a docker that can compile the coredb code. This part is inside the directory [coredbCodeDocker](./baseCoredbDocker/coredbCodeDocker).
   * To achieve this it will load up config for a tomcat inside that docker and settings to be able to clone the coredb repository
@@ -30,9 +33,13 @@ So, **important**, this docker will only function if it can be called as if it i
 
 ### Create an initial loaded coredb
 **CAVEAT** need to be able to read from s3. Saml log on is necessary. There is a script inside that performs the log in but only in case you have created your profile. The script is called `log_on_through_saml.sh`. To create profile, check [this confluence page](https://confluence.tomtomgroup.com/display/OSM/Logging+into+an+AWS+account)
-To avoid annoying bug-hunts, this script is called by default during a run for now, this unfortunately means that the script is not fully unattended. Also, the script assumes that saml2aws is installed in a specific folder. If you want to skip this check because you want to install it elsewhere and call manually, you can add the --skip-saml flag.
+To avoid annoying bug-hunts, this script is called by default during a run for now, this unfortunately means that the script is not fully unattended. Also, the script assumes that saml2aws is installed in a specific folder. 
+If you want to skip this check because you want to install it elsewhere and or call it manually, you can add the `--skip-saml` flag.
 
 There is a script that will create a coredb with an initial load performed. It is called [build_osm_hkm_layer.sh](./build_osm_hkm_layer.sh)
+
+The script can be invoked like `./build_osm_hkm_layer.sh --usergroup=janssenk:janssenk --version=42` (fill out your own user and group). 
+The user and groupd are again necessary for chowning. There are two extra flags, as explained the `skip-saml` flag, als the `old-data-style` flag, mainly when using a dump in the old style. Explained a bit more in depth later in the readme.
 
 * This script will perform all the same steps for creating an empty coredb but will not perform the last step, creating the empty docker. Instead, it will run the [load_into_postgres_new.sh](osmCoredbDocker/load_into_postgres_new.sh) script that will clone an s3 folder containing an initial load and load these dumped csv files.
   * Note, there is a version that handles the old style of dumps, called [load_into_fresh_postgres.sh](osmCoredbDocker/load_into_postgres.sh). This is currently no longer used but is just present in case somebody encounters a dump in the old style. The difference between both is not totally clear to me but if you get errors concerning the directory layout of the dump you're trying to load you are or not authorized to download the dump or the dump is in the other format than the one you selected.

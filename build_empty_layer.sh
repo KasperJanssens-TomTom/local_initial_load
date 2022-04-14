@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euxo
+set -euo
 
 function show_usage {
   echo
